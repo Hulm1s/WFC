@@ -32,15 +32,17 @@ namespace WFC.Core
         public Cell GetLowestEntropyCell()
         {
             Cell lowest = null;
-            int minEntropy = int.MaxValue;
+            double minEntropy = double.MaxValue;
 
             foreach(var cell in Grid)
             {
                 if(!cell.IsCollapsed && !cell.IsContradiction)
                 {
-                    if(cell.Entropy < minEntropy)
+                    //Vytvoření jemného noise, abychom nezačínali vždy od (0,0)
+                    double noisy = cell.Entropy + rng.NextDouble() * 0.001; 
+                    if( noisy < minEntropy)
                     {
-                        minEntropy = cell.Entropy;
+                        minEntropy = noisy;
                         lowest = cell;
                     }
                 }
