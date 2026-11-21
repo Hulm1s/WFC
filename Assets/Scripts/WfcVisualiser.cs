@@ -24,6 +24,7 @@ public class WfcVisualiser : MonoBehaviour
         {
             bool stepped = wfcGrid.Step();
             if(!stepped) Debug.Log("Generovani ukonceno nebo slepa ulicka");
+            else Debug.Log($"Count of popped cells: {wfcGrid.LastCellsPopped} Count of removed tiles: {wfcGrid.LastTilesRemoved}");
         }
 
         if (Input.GetKeyDown(KeyCode.R))

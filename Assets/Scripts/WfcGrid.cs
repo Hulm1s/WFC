@@ -9,7 +9,9 @@ namespace WFC.Core
     {
         public int Width {get; private set;}
         public int Height {get; private set;}
-
+        //Properties for measuring. To remain independent on Unity. 
+        public int LastCellsPopped {get; private set;}
+        public int LastTilesRemoved {get; private set;}
         public Cell[,] Grid {get; private set;}
 
         private Random rng = new Random();
@@ -63,12 +65,15 @@ namespace WFC.Core
 
         private void Propagate(Cell startCell)
         {
+            int poppedCells = 0;
+            int removedTiles = 0;
             Stack<Cell> stack = new Stack<Cell>();
             stack.Push(startCell);
 
             while (stack.Count > 0)
             {
                 Cell current = stack.Pop();
+                poppedCells +=1;
 
                 foreach(Direction dir in Enum.GetValues(typeof(Direction)))
                 {
@@ -79,12 +84,15 @@ namespace WFC.Core
                     current.PossibleTiles.Any(myTile => myTile.CanConnectTo(neighborTile, dir))).ToList();
 
                     if(validNeighborTiles.Count < neighbor.PossibleTiles.Count){
+                        removedTiles += neighbor.PossibleTiles.Count - validNeighborTiles.Count;
                         neighbor.PossibleTiles.Clear();
                         neighbor.PossibleTiles.AddRange(validNeighborTiles);
                         stack.Push(neighbor);
                     }
                 }
             }
+            LastCellsPopped = poppedCells;
+            LastTilesRemoved = removedTiles;
         }
 
         private Cell GetNeighbor(Cell cell, Direction dir)
