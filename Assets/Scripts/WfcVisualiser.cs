@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using WFC.Core;
+
+public enum TileSetMode { Full, NoEmptyNoCross, OnlyFour, Impossible };
 public class WfcVisualiser : MonoBehaviour
 {
+    public TileSetMode tileSet = TileSetMode.Full;
     public int width = 10;
     public int height = 10;
     public int seed = 42;
@@ -22,31 +25,107 @@ public class WfcVisualiser : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            bool stepped = wfcGrid.Step();
-            if(!stepped) Debug.Log("Generovani ukonceno nebo slepa ulicka");
-            else Debug.Log($"Count of popped cells: {wfcGrid.LastCellsPopped} Count of removed tiles: {wfcGrid.LastTilesRemoved}");
+            StepResult result = wfcGrid.Step();
+            switch (result)
+            {
+                case StepResult.Running:
+                    Debug.Log($"popped: {wfcGrid.LastCellsPopped}, removed: {wfcGrid.LastTilesRemoved}");
+                    break;
+                case StepResult.Finished:
+                    Debug.Log("Generation Finished!");
+                    break;
+                case StepResult.Contradicted:
+                    Debug.Log($"Contradiction at x={wfcGrid.ContradictionCell.X}, y={wfcGrid.ContradictionCell.Y}");
+                    break;
+            }
         }
-
         if (Input.GetKeyDown(KeyCode.R))
         {
             InitWfc();
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            int runs = 100;
+            int contradictions = 0; 
+
+            for (int s = 0; s< runs; s++)
+            {
+                WfcGrid grid = new WfcGrid(width, height, tiles, s);
+
+                StepResult result = StepResult.Running;
+                while (result == StepResult.Running)
+                {
+                    result = grid.Step();
+                } 
+
+                if(result == StepResult.Contradicted)
+                {
+                    contradictions++;
+                }
+            }
+
+            Debug.Log($"{contradictions} / {runs} ended in a contradiction");
         }
     }
 
     void InitWfc()
     {
         //zakladni sada dilku
-        tiles = new List<TileData>
+        switch (tileSet)
         {
-            new TileData("Prazdno", ' ', 0, 0, 0, 0),
-            new TileData("Rovna_SJ", '║', 1, 0, 1, 0),
-            new TileData("Rovna_VZ", '═', 0, 1, 0, 1),
-            new TileData("Krizovatka", '╬', 1, 1, 1, 1),
-            new TileData("Roh_SV", '╚', 1, 1, 0, 0),
-            new TileData("Roh_VJ", '╔', 0, 1, 1, 0),
-            new TileData("Roh_JZ", '╗', 0, 0, 1, 1),
-            new TileData("Roh_ZS", '╝', 1, 0, 0, 1)
-        };
+            
+            case TileSetMode.Full:
+                tiles = new List<TileData>{
+                    new TileData("Prazdno", ' ', 0, 0, 0, 0),
+                    new TileData("Rovna_SJ", '║', 1, 0, 1, 0),
+                    new TileData("Rovna_VZ", '═', 0, 1, 0, 1),
+                    new TileData("Krizovatka", '╬', 1, 1, 1, 1),
+                    new TileData("Roh_SV", '╚', 1, 1, 0, 0),
+                    new TileData("Roh_VJ", '╔', 0, 1, 1, 0),
+                    new TileData("Roh_JZ", '╗', 0, 0, 1, 1),
+                    new TileData("Roh_ZS", '╝', 1, 0, 0, 1)
+                };
+                break;
+            case TileSetMode.NoEmptyNoCross:
+                tiles = new List<TileData>{
+                //new TileData("Prazdno", ' ', 0, 0, 0, 0),
+                new TileData("Rovna_SJ", '║', 1, 0, 1, 0),
+                new TileData("Rovna_VZ", '═', 0, 1, 0, 1),
+                //new TileData("Krizovatka", '╬', 1, 1, 1, 1),
+                new TileData("Roh_SV", '╚', 1, 1, 0, 0),
+                new TileData("Roh_VJ", '╔', 0, 1, 1, 0),
+                new TileData("Roh_JZ", '╗', 0, 0, 1, 1),
+                new TileData("Roh_ZS", '╝', 1, 0, 0, 1)
+                };
+                break;
+            case TileSetMode.OnlyFour:
+                tiles = new List<TileData>{
+                //new TileData("Prazdno", ' ', 0, 0, 0, 0),
+                new TileData("Rovna_SJ", '║', 1, 0, 1, 0),
+                new TileData("Rovna_VZ", '═', 0, 1, 0, 1),
+                //new TileData("Krizovatka", '╬', 1, 1, 1, 1),
+                new TileData("Roh_SV", '╚', 1, 1, 0, 0),
+                new TileData("Roh_VJ", '╔', 0, 1, 1, 0),
+                //new TileData("Roh_JZ", '╗', 0, 0, 1, 1),
+                //new TileData("Roh_ZS", '╝', 1, 0, 0, 1)
+                };
+                break;
+            case TileSetMode.Impossible:
+                tiles = new List<TileData>{
+                //new TileData("Prazdno", ' ', 0, 0, 0, 0),
+                //new TileData("Rovna_SJ", '║', 1, 0, 1, 0),
+                //new TileData("Rovna_VZ", '═', 0, 1, 0, 1),
+                //new TileData("Krizovatka", '╬', 1, 1, 1, 1),
+                new TileData("Roh_SV", '╚', 1, 1, 0, 0),
+                new TileData("Roh_VJ", '╔', 0, 1, 1, 0),
+                //new TileData("Roh_JZ", '╗', 0, 0, 1, 1),
+                //new TileData("Roh_ZS", '╝', 1, 0, 0, 1)
+                };
+                break;
+        }
+        
+            
+        
         wfcGrid = new WfcGrid(width, height, tiles, seed);
         Debug.Log("Mřížka připravena! Mačkej MEZERNÍK pro skládání krok za krokem.");
     }

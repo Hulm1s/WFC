@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace WFC.Core
 {
+    public enum StepResult
+    {
+        Finished, Contradicted, Running
+    }
     public class WfcGrid
     {
         public int Width {get; private set;}
@@ -12,6 +16,8 @@ namespace WFC.Core
         //Properties for measuring. To remain independent on Unity. 
         public int LastCellsPopped {get; private set;}
         public int LastTilesRemoved {get; private set;}
+
+        public Cell ContradictionCell {get; private set;}
         public Cell[,] Grid {get; private set;}
 
         private Random rng;
@@ -53,14 +59,17 @@ namespace WFC.Core
             return lowest;
         }
 //Krok algoritmu (Kolaps + Propagace)
-        public bool Step()
+        public StepResult Step()
         {
             Cell cellToCollapse = GetLowestEntropyCell();
-            if(cellToCollapse == null) return false; //HOTOVO nebo slepa 
-
+            if(cellToCollapse == null) return StepResult.Finished ; //Done
+            
             cellToCollapse.Collapse(rng);
             Propagate(cellToCollapse);
-            return true;
+
+
+            if(ContradictionCell != null) return StepResult.Contradicted; //Contradicted
+            return StepResult.Running; 
 
         }
 
@@ -70,8 +79,8 @@ namespace WFC.Core
             int removedTiles = 0;
             Stack<Cell> stack = new Stack<Cell>();
             stack.Push(startCell);
-
-            while (stack.Count > 0)
+            bool contradiction = false;
+            while (stack.Count > 0 && !contradiction)
             {
                 Cell current = stack.Pop();
                 poppedCells +=1;
@@ -85,6 +94,11 @@ namespace WFC.Core
                     current.PossibleTiles.Any(myTile => myTile.CanConnectTo(neighborTile, dir))).ToList();
 
                     if(validNeighborTiles.Count < neighbor.PossibleTiles.Count){
+                        //check for contradiction
+                        if (validNeighborTiles.Count == 0) {
+                            contradiction = true;
+                            ContradictionCell = neighbor;
+                        }
                         removedTiles += neighbor.PossibleTiles.Count - validNeighborTiles.Count;
                         neighbor.PossibleTiles.Clear();
                         neighbor.PossibleTiles.AddRange(validNeighborTiles);
