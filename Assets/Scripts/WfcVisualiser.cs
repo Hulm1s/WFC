@@ -6,7 +6,7 @@ public class WfcVisualiser : MonoBehaviour
 {
     public int width = 10;
     public int height = 10;
-
+    public int seed = 42;
     private WfcGrid wfcGrid;
     private List<TileData> tiles;
 
@@ -33,7 +33,6 @@ public class WfcVisualiser : MonoBehaviour
         }
     }
 
-
     void InitWfc()
     {
         //zakladni sada dilku
@@ -48,7 +47,7 @@ public class WfcVisualiser : MonoBehaviour
             new TileData("Roh_JZ", '╗', 0, 0, 1, 1),
             new TileData("Roh_ZS", '╝', 1, 0, 0, 1)
         };
-        wfcGrid = new WfcGrid(width, height, tiles);
+        wfcGrid = new WfcGrid(width, height, tiles, seed);
         Debug.Log("Mřížka připravena! Mačkej MEZERNÍK pro skládání krok za krokem.");
     }
 

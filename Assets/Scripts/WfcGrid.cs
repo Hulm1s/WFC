@@ -14,14 +14,15 @@ namespace WFC.Core
         public int LastTilesRemoved {get; private set;}
         public Cell[,] Grid {get; private set;}
 
-        private Random rng = new Random();
+        private Random rng;
 
-        public WfcGrid(int width, int height, List<TileData> allTiles)
+        public WfcGrid(int width, int height, List<TileData> allTiles, int seed)
         {
+            rng = new Random(seed);
             Width = width;
             Height = height;
             Grid = new Cell[width, height];
-
+            
             for(int x = 0; x < width; x++)
             {
                 for(int y = 0; y < height; y++)
