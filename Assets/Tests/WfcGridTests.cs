@@ -39,4 +39,27 @@ public class WfcGridTests
                 Assert.AreEqual(a.Grid[x, y].PossibleTiles[0].Id, 
                                 b.Grid[x, y].PossibleTiles[0].Id);
     }
+
+
+    [Test]
+    public void FinishedGrid_BreaksNoRule()
+    {
+        var tiles = FullSet();
+        var a = new WfcGrid(10, 10, tiles, 42);
+        var result = RunToEnd(a); 
+        if(Assert.AreEqual(StepResult.Finished, result)){
+            for(int x = 0; x < a.Width; x++ ){
+                for(int y = 0; y < a.Height; y++){
+                    TileData current = a.Grid[x,y].PossibleTiles[0];
+                    if(x+1 < a.Width-1)
+                        Assert.AreEqual(a.Grid[x+1,y].PossibleTiles[0].Sockets[3],current.Sockets[1]);
+                    if(y+1 < a.Height-1)
+                        Assert.AreEqual(a.Grid[x,y+1].PossibleTiles[0].Sockets[2], current.Sockets[0]);
+                }
+            }
+        }
+
+
+
+    }
 }
