@@ -67,10 +67,17 @@ namespace WFC.Core
             cellToCollapse.Collapse(rng);
             Propagate(cellToCollapse);
 
-
             if(ContradictionCell != null) return StepResult.Contradicted; //Contradicted
+            
+            if(!HasUndecidedCell()) return StepResult.Finished; // Done in this step
             return StepResult.Running; 
 
+        }
+        private bool HasUndecidedCell()
+        {
+            foreach (var cell in Grid)
+                if(!cell.IsCollapsed && !cell.IsContradiction) return true;
+            return false;
         }
 
         private void Propagate(Cell startCell)

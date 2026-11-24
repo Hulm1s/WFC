@@ -24,6 +24,11 @@ public class WfcGridTests
         while (result == StepResult.Running) result = grid.Step();
         return result;
     }
+    private StepResult OneStep(WfcGrid grid)
+    {
+        StepResult result = grid.Step();
+        return result;
+    }
 
     [Test]
     public void SameSeed_GivesSameGrid()
@@ -47,19 +52,29 @@ public class WfcGridTests
         var tiles = FullSet();
         var a = new WfcGrid(10, 10, tiles, 42);
         var result = RunToEnd(a); 
-        if(Assert.AreEqual(StepResult.Finished, result)){
-            for(int x = 0; x < a.Width; x++ ){
-                for(int y = 0; y < a.Height; y++){
-                    TileData current = a.Grid[x,y].PossibleTiles[0];
-                    if(x+1 < a.Width-1)
-                        Assert.AreEqual(a.Grid[x+1,y].PossibleTiles[0].Sockets[3],current.Sockets[1]);
-                    if(y+1 < a.Height-1)
-                        Assert.AreEqual(a.Grid[x,y+1].PossibleTiles[0].Sockets[2], current.Sockets[0]);
-                }
+        Assert.AreEqual(StepResult.Finished, result);
+        for(int x = 0; x < a.Width; x++ ){
+            for(int y = 0; y < a.Height; y++){
+                TileData current = a.Grid[x,y].PossibleTiles[0];
+                if(x < a.Width-1)
+                    Assert.AreEqual(a.Grid[x+1,y].PossibleTiles[0].Sockets[3],current.Sockets[1], $"east mismatch at {x}, {y}");
+                if(y < a.Height-1)
+                    Assert.AreEqual(a.Grid[x,y+1].PossibleTiles[0].Sockets[2], current.Sockets[0], $"north mismatch at {x}, {y}");
             }
         }
 
 
 
+    }
+
+
+    [Test]
+    public void OneByOne_FineshesInOneStep()
+    {
+        var tiles = FullSet();
+        var a = new WfcGrid(1, 1, tiles, 42);
+        
+        StepResult result = OneStep(a);
+        Assert.AreEqual(StepResult.Finished, result);
     }
 }
