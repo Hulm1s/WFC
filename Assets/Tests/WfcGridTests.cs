@@ -24,11 +24,6 @@ public class WfcGridTests
         while (result == StepResult.Running) result = grid.Step();
         return result;
     }
-    private StepResult OneStep(WfcGrid grid)
-    {
-        StepResult result = grid.Step();
-        return result;
-    }
 
     [Test]
     public void SameSeed_GivesSameGrid()
@@ -69,12 +64,12 @@ public class WfcGridTests
 
 
     [Test]
-    public void OneByOne_FineshesInOneStep()
+    public void OneByOne_FinishesInOneStep()
     {
         var tiles = FullSet();
         var a = new WfcGrid(1, 1, tiles, 42);
         
-        StepResult result = OneStep(a);
+        StepResult result = a.Step();
         Assert.AreEqual(StepResult.Finished, result);
     }
 }
